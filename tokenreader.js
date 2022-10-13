@@ -4,11 +4,15 @@ export class TokenReader {
     this.the_index = 0;
   }
 
-  read() {
-    if (this.the_index < this.strlist.length) {
-      return this.strlist[this.the_index++];
+  read(lineNumber) {
+    //console.log(this.the_index,)
+    if (this.the_index < this.strlist[lineNumber].length) {
+      return this.strlist[lineNumber].charAt(this.the_index++);
     }
-    return null;
+    if(this.the_index == this.strlist[lineNumber].length){
+      this.the_index = 0
+      return '/r/n'
+    }
   }
 
   peekNext(num = 1) {

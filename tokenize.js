@@ -1,5 +1,7 @@
 import { TokenReader } from "./tokenreader";
-import { isIdentifierStart, scanIdentifier, isNumeric,checkisPunctuator } from "./utils_token.js";
+import { isIdentifierStart, scanIdentifier, 
+  isNumeric,checkisPunctuator,scanPunctuator
+} from "./utils_token.js";
 
 export class Scanner {
   constructor() {
@@ -16,35 +18,39 @@ export class Scanner {
 
     this.lineNumber = 0;
     this.lineIndex = 0;
+
+    this.tokenReader = null
   }
 
   tokenize(code) {
     this.middleValue = "";
 
-    const reader = new TokenReader(code.split(/\r\n/));//分割换行
-    console.log(reader)  //charAt
+    this.tokenReader = new TokenReader(code.split(/\r\n/));//分割换行
+    console.log(this.tokenReader)  //charAt
+    
+    
+   
 
-    let ch = null;
+   // let ch = null;
     let last_state = "Initial"; //上一个字符的状态
 
-    while ((ch = reader.read())) {
+    while (  this.lineNumber < this.tokenReader.strlist.length   ) {
+        let ch = this.tokenReader.read(this.lineNumber)
         console.log('\n')
-        // if(ch == '\r'){
-        //     if(reader.peekNext(1) == '\n'){
-        //         this.lineNumber += 1
-        //         this.lineIndex = 0;
-        //         reader.jumpPosition(1)
-        //     }  
-        // }
-        // if(ch == '\n'){
-        //     this.lineNumber += 1
-        //     this.lineIndex = 0;
-        //}
+        console.log('----ch---',ch)
+       
+      
+        if(ch == '/r/n'){
+            this.lineNumber += 1
+            this.lineIndex = 0;
+            last_state =  this.lexToken(null,'isend')
+            continue
+        }
 
 
       switch (last_state) {
         case "Initial":
-          console.log("------------Initial-------", ch);
+          //console.log("------------Initial-------", ch);
           last_state = this.lexToken(ch);
           break;
         case "Id":
@@ -68,15 +74,43 @@ export class Scanner {
     return new TokenReader(this.tokenList);
   }
 
-  lexToken(param) {
+  lexToken(param,type) {
     console.log('-------lexToken----',param)
+
+    if(type =='isend'){
+       if(this.middleValue.length > 0){
+        this.token.value = this.middleValue ;
+        if(this.token.type === 'Id'){
+          this.token.type = scanIdentifier(this.token.value)
+        }
+        this.token.column  = this.tokenReader.the_index-2
+        this.tokenList.push(this.token);
+
+
+       }
+
+       this.middleValue = "";
+       this.token = {
+         type: '',
+         value: null,
+         line: this.lineNumber ,
+         column:0,
+       };
+
+       newState = "Initial";
+       return newState;
+
+    }
+
     if (this.middleValue.length > 0) {
       this.token.value = this.middleValue;
 
       if(this.token.type === 'Id'){
         this.token.type = scanIdentifier(this.token.value)
       }
-      
+      this.token.column  = this.tokenReader.the_index-2
+
+      //console.log('-----this.tokenList.push---',this.token.value,this.middleValue,this.middleValue.length)
       this.tokenList.push(this.token);
       
 
@@ -84,7 +118,7 @@ export class Scanner {
       this.token = {
         type: '',
         value: null,
-        line:0,
+        line: this.lineNumber ,
         column:0,
       };
     }
@@ -107,10 +141,14 @@ export class Scanner {
       this.appendmiddleValue(param);
       return newState;
     }
+    if(param == ' '){//检测空格
+      newState = "Initial";
+      return newState;
+    }
 
 
     this.appendmiddleValue(param);
-      return newState;
+    return newState;
 
    
   }
