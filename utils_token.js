@@ -74,7 +74,12 @@ let c_2 = /<|>|=|\+|-|!|\*|\%|\&|\||\^|\/|\{|\}|\(|\)|\.|\?|\;|\,|\~|\[|\]/.test
 }
 
 //区分操作符
-export const scanPunctuator =(str) =>{
+export const scanPunctuator =(start,source) =>{
+    console.log('------scanPunctuator',start,source)
+   // return
+
+ let str = source[start];
+ 
     
     switch (str) {
         case '(':
@@ -82,32 +87,32 @@ export const scanPunctuator =(str) =>{
             if (str === '{') {
                 this.curlyStack.push('{');
             }
-            ++this.index;
+            ++start;
             break;
 
         case '.':
-            ++this.index;
-            if (this.source[this.index] === '.' && this.source[this.index + 1] === '.') {
+            ++start;
+            if (source[start] === '.' && source[start + 1] === '.') {
                 // Spread operator: ...
-                this.index += 2;
+                start += 2;
                 str = '...';
             }
             break;
 
         case '}':
-            ++this.index;
+            ++start;
             this.curlyStack.pop();
             break;
 
         case '?':
-            ++this.index;
-            if (this.source[this.index] === '?') {
-                ++this.index;
+            ++start;
+            if (source[start] === '?') {
+                ++start;
                 str = '??';
-            } if (this.source[this.index] === '.' && !/^\d$/.test(this.source[this.index + 1])) {
+            } if (source[start] === '.' && !/^\d$/.test(source[start + 1])) {
                 // "?." in "foo?.3:0" should not be treated as optional chaining.
                 // See https://github.com/tc39/proposal-optional-chaining#notes
-                ++this.index;
+                ++start;
                 str = '?.';
             }
             break;
@@ -119,25 +124,27 @@ export const scanPunctuator =(str) =>{
         case ']':
         case ':':
         case '~':
-            ++this.index;
+            ++start;
             break;
 
         default:
             // 4-character punctuator.
-            str = this.source.substring(this.index, 4);
+            str = source.substr(start, 4);
+          //  console.log('------4-----',str)
             if (str === '>>>=') {
-                this.index += 4;
+                start += 4;
             } else {
 
                 // 3-character punctuators.
-                str = str.substring(0, 3);
+                str = str.substr(0, 3);
                 if (str === '===' || str === '!==' || str === '>>>' ||
                     str === '<<=' || str === '>>=' || str === '**=') {
-                    this.index += 3;
+                    start += 3;
                 } else {
 
                     // 2-character punctuators.
-                    str = str.substring(0, 2);
+                    str = str.substr(0, 2);
+                    //console.log('------2-----',str)
                     if (str === '&&' || str === '||' || str === '??' ||
                         str === '==' || str === '!=' ||
                         str === '+=' || str === '-=' || str === '*=' || str === '/=' ||
@@ -146,29 +153,23 @@ export const scanPunctuator =(str) =>{
                         str === '&=' || str === '|=' || str === '^=' || str === '%=' ||
                         str === '<=' || str === '>=' || str === '=>' ||
                         str === '**') {
-                        this.index += 2;
+                        start += 2;
                     } else {
 
                         // 1-character punctuators.
-                        str = this.source[this.index];
+                        str = source[start];
                         if ('<>=!+-*%&|^/'.indexOf(str) >= 0) {
-                            ++this.index;
+                            ++start;
                         }
                     }
                 }
             }
     }
-
-    if (this.index === start) {
-        this.throwUnexpectedToken();
+ 
+    let c_1= {
+        value:str,
+        endindex:start,
     }
-
-    return {
-        type: Token.Punctuator,
-        value: str,
-        lineNumber: this.lineNumber,
-        lineStart: this.lineStart,
-        start: start,
-        end: this.index
-    };
+    console.log(c_1)
+    return c_1
 }

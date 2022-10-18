@@ -35,7 +35,7 @@ export class Scanner {
     let last_state = "Initial"; //上一个字符的状态
 
     while (  this.lineNumber < this.tokenReader.strlist.length   ) {
-        let ch = this.tokenReader.read(this.lineNumber)
+        let ch = this.tokenReader.readNext(this.lineNumber)
         console.log('\n')
         console.log('----ch---',ch)
        
@@ -118,7 +118,7 @@ export class Scanner {
       this.token = {
         type: '',
         value: null,
-        line: this.lineNumber ,
+        line: this.lineNumber,
         column:0,
       };
     }
@@ -133,12 +133,19 @@ export class Scanner {
      this.appendmiddleValue(param);
      return newState;
     }
-    if ( checkisPunctuator(param) ) {
+    if ( checkisPunctuator(param) ) { //符号开头
         console.log('----------is =----------',param)
       newState = "Punctuator";
       this.token.type = "Punctuator";
 
-      this.appendmiddleValue(param);
+      let c_1 =  scanPunctuator(this.tokenReader.the_index -1,this.tokenReader.strlist[this.lineNumber] )
+      this.token.value = c_1.value
+      this.tokenReader.jumpToPosition(c_1.endindex)
+      this.token.column  = c_1.endindex -1
+      this.tokenList.push(this.token);
+
+      this.resetToken()
+      newState = "Initial";
       return newState;
     }
     if(param == ' '){//检测空格
@@ -147,8 +154,8 @@ export class Scanner {
     }
 
 
-    this.appendmiddleValue(param);
-    return newState;
+    // this.appendmiddleValue(param);
+    // return newState;
 
    
   }
@@ -161,6 +168,18 @@ export class Scanner {
   appendmiddleValue(param) {
     this.middleValue = this.middleValue + param;
   }
+
+  resetToken(){
+    this.middleValue = "";
+    this.token = {
+      type: '',
+      value: null,
+      line: this.lineNumber ,
+      column:0,
+    };
+  }
+
+
 }
 
 

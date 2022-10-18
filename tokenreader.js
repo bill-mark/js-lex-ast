@@ -4,7 +4,7 @@ export class TokenReader {
     this.the_index = 0;
   }
 
-  read(lineNumber) {
+  readNext(lineNumber) {
     //console.log(this.the_index,)
     if (this.the_index < this.strlist[lineNumber].length) {
       return this.strlist[lineNumber].charAt(this.the_index++);
@@ -32,7 +32,7 @@ export class TokenReader {
     return this.the_index;
   }
 
-  jumpPosition(num){
-    this.the_index += num
+  jumpToPosition(num){
+    this.the_index = num
   }
 }
