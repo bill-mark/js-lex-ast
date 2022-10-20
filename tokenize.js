@@ -1,6 +1,7 @@
 import { TokenReader } from "./tokenreader";
 import { isIdentifierStart, scanIdentifier, 
-  isNumeric,checkisPunctuator,scanPunctuator
+  isNumeric,checkisPunctuator,scanPunctuator,
+  scanStringLiteral
 } from "./utils_token.js";
 
 export class Scanner {
@@ -124,7 +125,10 @@ export class Scanner {
     }
 
     let newState = "Initial";
-
+    if(param == ' '){//检测空格
+      newState = "Initial";
+      return newState;
+    }
     //标识符开头
     if (isIdentifierStart(param)) {
       //console.log("标识符开头", param, isIdentifierStart(param));
@@ -148,10 +152,14 @@ export class Scanner {
       newState = "Initial";
       return newState;
     }
-    if(param == ' '){//检测空格
-      newState = "Initial";
-      return newState;
+    //字符串
+    if( param === '\'' || param === '"' ){
+      console.log('-----xxx------',this.tokenReader.the_index)
+      let c_1 =  scanStringLiteral(param,this.tokenReader.the_index,this.tokenReader.strlist[this.lineNumber], )
+      console.log('-------string--',c_1)
     }
+    
+
 
 
     // this.appendmiddleValue(param);

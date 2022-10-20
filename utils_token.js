@@ -1,4 +1,5 @@
-//import { Token } from './token';
+import { TokenReader } from "./tokenreader";
+import {syntaxError} from "./error.js"
 
 //判断标识符开头
 export const isIdentifierStart =(cp)=> {
@@ -172,4 +173,29 @@ export const scanPunctuator =(start,source) =>{
     }
     console.log(c_1)
     return c_1
+}
+
+
+//区分字符串
+export const scanStringLiteral = (last_param,start_index,source)=>{
+    console.log('----scanStringLiteral',start_index,source)
+    let str = source.substr(start_index);
+
+    let c_1 = str.length
+
+    console.log('----str---',str,c_1)
+
+    if(c_1 === 0){
+        return syntaxError('not a string')
+    }
+    
+    let c_2 = 0
+    while(c_2 < c_1){
+        if(str[c_2] === '"' ){
+          break
+        }
+
+        c_2++
+    }
+    return start_index+c_2
 }
